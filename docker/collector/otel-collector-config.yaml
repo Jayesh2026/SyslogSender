@@ -1,152 +1,3 @@
-# # docker/collector/otel-collector-config.yaml
-# receivers:
-#   otlp:
-#     protocols:
-#       grpc:
-#         endpoint: 0.0.0.0:4317
-#       http:
-#         endpoint: 0.0.0.0:4318
-  
-#   syslog:
-#     tcp:
-#       listen_address: "0.0.0.0:514"
-#     protocol: rfc5424
-#     operators:
-#       - type: regex_parser
-#         regex: '^<(\d+)>(\d+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+-\s+(.*)$'
-#         parse_from: body
-#         timestamp:
-#           parse_from: attributes.timestamp
-#           layout: '%Y-%m-%d %H:%M:%S.%L'
-    
-# processors:
-#   batch:
-  
-#   resource:
-#     attributes:
-#       - key: service.name
-#         value: "your-service-name"
-#         action: upsert
-
-# exporters:
-#   logging:
-#     loglevel: debug
-    
-#   otlp:
-#     endpoint: "your-otlp-endpoint:4317" # Replace with your endpoint
-#     tls:
-#       insecure: true
-
-# service:
-#   pipelines:
-#     logs:
-#       receivers: [otlp, syslog]
-#       processors: [batch, resource]
-#       exporters: [debug, otlp]
-#     traces:
-#       receivers: [otlp]
-#       processors: [batch, resource]
-#       exporters: [debug, otlp]
-#     metrics:
-#       receivers: [otlp]
-#       processors: [batch, resource]
-#       exporters: [debug, otlp]
-
-
-# receivers:
-#   # otlp:
-#   #   protocols:
-#   #     http:
-#   #       endpoint: "0.0.0.0:4318"
-#   #     grpc:
-#   #       endpoint: "0.0.0.0:4317"
-
-  # syslog:
-  #   tcp:
-  #     listen_address: "0.0.0.0:514"
-  #   protocol: rfc5424
-  #   operators:
-  #     - type: syslog_parser
-  #       protocol: rfc5424
-  #       parse_from: body
-  #       parse_to: attributes
-#       - type: remove
-#         field: attributes #.unused_field  # Specify the field to remove
-
-# processors:
-#   batch:
-#     timeout: 1s
-#     send_batch_size: 1024
-
-# exporters:
-#   debug:
-#     verbosity: detailed
-
-# service:
-#   pipelines:
-#     logs:
-#       receivers: [syslog]
-#       processors: [batch]
-#       exporters: [debug]
-
-
-
-
-
-# receivers:
-#   otlp:
-#     protocols:
-#       http:
-#         endpoint: 0.0.0.0:4318
-#       grpc:
-#         endpoint: 0.0.0.0:4317
-#   syslog:
-#     tcp:
-#       listen_address: "0.0.0.0:514"
-#     udp:
-#       listen_address: "0.0.0.0:514"
-#     protocol: rfc5424
-#     operators:
-#       - type: syslog_parser
-#         parse_from: body
-#         protocol: rfc5424
-#         parse_to: attributes
-#         preserve_to: attributes.original_message
-#         severity:
-#           parse_from: attributes.severity
-#         timestamp:
-#           parse_from: attributes.timestamp
-#           layout: '%Y-%m-%d %H:%M:%S.%L'
-
-# processors:
-#   batch:
-#     timeout: 1s
-#     send_batch_size: 1024
-#   attributes:
-#     actions:
-#       - key: app.protocol
-#         value: syslog
-#         action: upsert
-
-# exporters:
-#   debug:
-#     verbosity: detailed
-
-# service:
-#   pipelines:
-#     logs:
-#       receivers: [syslog]
-#       processors: [batch, attributes]
-#       exporters: [debug]
-
-#   telemetry:
-#     logs:
-#       level: debug
-#     metrics:
-#       level: none
-
-
-
 receivers:
   otlp:
     protocols:
@@ -181,4 +32,12 @@ service:
       receivers: [syslog, otlp]  # Receiver to collect Syslog logs
       processors: [batch]   # Optional: Batch processor
       exporters: [debug]    # Send to debug exporter
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
     
