@@ -28,7 +28,8 @@ public class SyslogSenderService {
         try {
             String localHostName = InetAddress.getLocalHost().getHostName();
             messageSender.setDefaultMessageHostname(localHostName);
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException ex) {
+            logger.warn("Failed to get local host name, using 'localhost' as default.", ex);
             messageSender.setDefaultMessageHostname("localhost");
         }
 
