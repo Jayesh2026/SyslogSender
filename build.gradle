@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.3.5'
+	id 'org.springframework.boot' version '3.4.0'
 	id 'io.spring.dependency-management' version '1.1.6'
 }
 
@@ -26,11 +26,7 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
-    // implementation 'com.github.sebhoss:syslog4j:0.9.51'  // Syslog4j for sending Syslog messages
-
-	// https://mvnrepository.com/artifact/org.syslog4j/syslog4j
-	// implementation 'org.syslog4j:syslog4j:0.9.30'
-
+	// Dependency for the Syslog Java client library, used for sending syslog messages to a server (e.g., for logging or monitoring purposes).
 	implementation 'com.cloudbees:syslog-java-client:1.1.7'
 
 	compileOnly 'org.projectlombok:lombok'
