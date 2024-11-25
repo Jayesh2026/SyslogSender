@@ -27,13 +27,14 @@ A Spring Boot application that sends Syslog messages to a configured Syslog serv
    ```bash
    git clone https://github.com/Jayesh2026/SyslogSender.git
    cd syslog-sender
+   ```
 
-2. **Build the project:**
+2. **Build the project**:
    Build the project using Gradle. This will compile the application and generate the necessary files.
   ```bash
   ./gradlew build
   ```
-3. **Configure application properties:**
+3. **Configure application properties**:
     Update the following properties in ```application.properties``` based on your environment:
     - For local setup, uncomment and use localhost.
     - For Docker setup, use otel-collector as the Syslog server hostname.
@@ -44,3 +45,23 @@ A Spring Boot application that sends Syslog messages to a configured Syslog serv
     # Uncomment for Docker setup:
    syslog.server.hostname=otel-collector
    ```
+## Usage
+   - **Running Locally**
+      1. **Start the application**:
+         To run the application locally, use the following command:
+         ```bash
+         ./gradlew bootRun
+         ```
+
+     2. **Access the Syslog sender endpoint**:
+        Once the application is running, access the Syslog sender endpoint by navigating to:
+        ```bash
+        http://localhost:8081/send-syslog
+        ```
+        This will send a test Syslog message to the configured server and return a confirmation message:
+        ```
+        Syslog message sent!
+        ```
+
+
+
