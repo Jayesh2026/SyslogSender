@@ -62,6 +62,21 @@ A Spring Boot application that sends Syslog messages to a configured Syslog serv
         ```
         Syslog message sent!
         ```
-
+   - **Running with Docker**
+     1. **Build the Docker image**:
+        If you want to run the application inside a Docker container, use the following command to build the Docker image:
+        ```bash
+        docker-compose build
+        ```
+     2. **Start the application and dependencies**:
+        Use Docker Compose to start both the Syslog Sender application and the OpenTelemetry Collector:
+        ```bash
+        docker-compose up
+        ```
+     3. **Access the Syslog sender endpoint**:
+        Once the containers are running, access the Syslog sender endpoint by navigating to:
+        ```bash
+        http://localhost:8081/send-syslog
+        ```
 
 
