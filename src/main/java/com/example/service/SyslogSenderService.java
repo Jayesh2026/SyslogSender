@@ -35,8 +35,8 @@ public class SyslogSenderService {
         // Other configurations
         messageSender.setDefaultFacility(Facility.USER);
         messageSender.setDefaultSeverity(Severity.INFORMATIONAL);
-        messageSender.setSyslogServerHostname("0.0.0.0"); // Syslog server hostname for locally
-        // messageSender.setSyslogServerHostname("otel-collector"); // OTEL Collector hostname
+        // messageSender.setSyslogServerHostname("0.0.0.0"); // Syslog server hostname for locally
+        messageSender.setSyslogServerHostname("otel-collector"); // OTEL Collector hostname
         messageSender.setSyslogServerPort(514); // Syslog server port
         messageSender.setMessageFormat(MessageFormat.RFC_5424);
         messageSender.setSsl(false); // Set SSL if needed
