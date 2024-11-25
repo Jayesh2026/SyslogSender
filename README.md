@@ -25,7 +25,7 @@ A Spring Boot application that sends Syslog messages to a configured Syslog serv
 1. **Clone the repository**:  
    Clone the repository to your local machine.  
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Jayesh2026/SyslogSender.git
    cd syslog-sender
 
 2. **Build the project:**
