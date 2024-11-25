@@ -1,0 +1,107 @@
+# services:
+#   syslog-sender:
+#     build: .
+#     ports:
+#       - "8081:8081"  # Expose port 8081 for your Spring Boot app
+#     environment:
+#       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+#       OTEL_SERVICE_NAME: demo-syslog-sender
+#     depends_on:
+#       - otel-collector
+#     networks:
+#       - otel-network
+
+#   otel-collector:
+#     image: otel/opentelemetry-collector-contrib:latest  # OpenTelemetry Collector Docker image
+#     command: ["--config=/etc/docker/collector/otel-collector-config.yaml"]  # Load custom OpenTelemetry config
+#     volumes:
+#       - ./docker/collector/otel-collector-config.yaml:/etc/docker/collector/otel-collector-config.yaml  # Mount config file
+#     ports:
+#       - "4317:4317"   # OTLP gRPC receiver
+#       - "4318:4318"   # OTLP HTTP receiver
+#       - "514:514"     # Syslog TCP receiver (ensure that you are correctly receiving syslogs)
+#     networks:
+#       - otel-network  # Connect to the same network as other services
+
+# networks:
+#   otel-network:
+#     driver: bridge  # Use the bridge driver for networking between containers
+
+
+# services:
+#   demo-syslog-sender:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     ports:
+#       - "8081:8081"
+#     depends_on:
+#       - otel-collector
+#     environment:
+#       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+#       OTEL_SERVICE_NAME: demo-syslog-sender
+#       OTEL_TRACES_EXPORTER: otlp
+#       OTEL_METRICS_EXPORTER: otlp
+#       OTEL_LOGS_EXPORTER: otlp
+#       OTEL_RESOURCE_ATTRIBUTES: service.name=demo-syslog-sender,service.version=1.0
+#       # Add logging configuration
+#       LOGGING_LEVEL_ROOT: INFO
+#       LOGGING_LEVEL_COM_EXAMPLE: DEBUG
+#     networks:
+#       - otel-network
+
+#   otel-collector:
+#     image: otel/opentelemetry-collector-contrib:latest
+#     command: ["--config=/etc/docker/collector/otel-collector-config.yaml"]
+#     volumes:
+#       - ./docker/collector/otel-collector-config.yaml:/etc/docker/collector/otel-collector-config.yaml
+#     ports:
+#       - "4317:4317"   # OTLP gRPC receiver
+#       - "4318:4318"   # OTLP HTTP receiver
+#       - "514:514/tcp" # Syslog TCP
+#       - "514:514/udp" # Syslog UDP
+#     environment:
+#       - COLLECTOR_DEBUG=true  # Enable debug logging
+#     networks:
+#       - otel-network
+
+# networks:
+#   otel-network:
+#     driver: bridge
+
+
+
+services:
+  syslog-sender:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    depends_on:
+      - otel-collector
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_SERVICE_NAME: syslog-sender
+      OTEL_METRICS_EXPORTER: none # disable export metrics
+      OTEL_TRACES_EXPORTER: none  # disable trace export
+    networks:
+      - otel-network
+
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/docker/collector/otel-collector-config.yaml"]
+    volumes:
+      - ./docker/collector/otel-collector-config.yaml:/etc/docker/collector/otel-collector-config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "514:514" # Syslog TCP
+    networks:
+      - otel-network
+
+networks:
+  otel-network:
+    driver: bridge
+
