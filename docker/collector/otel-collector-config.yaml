@@ -13,9 +13,9 @@ receivers:
     operators:
       - type: syslog_parser
         protocol: rfc5424
-        parse_from: body          # Parse the body of the Syslog message
-        parse_to: attributes     # Store parsed information as attributes
-        preserve_to: attributes.original_message  # Preserve the original message
+    #     parse_from: body          # Parse the body of the Syslog message
+    #     parse_to: attributes     # Store parsed information as attributes
+    #     preserve_to: attributes.original_message  # Preserve the original message
 
 exporters:
   debug:
@@ -32,12 +32,13 @@ service:
       receivers: [syslog, otlp]  # Receiver to collect Syslog logs
       processors: [batch]   # Optional: Batch processor
       exporters: [debug]    # Send to debug exporter
-    traces:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [debug]
-    metrics:
-      receivers: [otlp]
-      processors: [batch]
-      exporters: [debug]
+
+    # traces:
+    #   receivers: [otlp]
+    #   processors: [batch]
+    #   exporters: [debug]
+    # metrics:
+    #   receivers: [otlp]
+    #   processors: [batch]
+    #   exporters: [debug]
     
