@@ -1,8 +1,5 @@
 package com.example.service.Impl;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,15 +21,8 @@ public class SyslogSenderServiceImpl implements SyslogSenderService{
     public SyslogSenderServiceImpl(@Value("${spring.application.name:default-app}") String appName,
             @Value("${syslog.server.hostname}") String syslogServerHostname,
             @Value("${syslog.server.port}") int syslogServerPort) {
+ 
         messageSender = new TcpSyslogMessageSender();
-
-        try {
-            String localHostName = InetAddress.getLocalHost().getHostName();
-            messageSender.setDefaultMessageHostname(localHostName);
-        } catch (UnknownHostException ex) {
-            logger.warn("Failed to get local host name, using 'localhost' as default.",ex);
-            messageSender.setDefaultMessageHostname("localhost");
-        }
 
         messageSender.setDefaultAppName(appName);
         messageSender.setSyslogServerHostname(syslogServerHostname);

@@ -14,16 +14,15 @@ services:
       OTEL_TRACES_EXPORTER: none  # disable trace export
 
       # Syslog Configuration
-      # Use host.docker.internal to connect to syslog on the host
-      SYSLOG_SERVER_HOSTNAME: host.docker.internal
+      SYSLOG_SERVER_HOSTNAME: myhostname
       SYSLOG_SERVER_PORT: 514
     networks:
       - otel-network
 
-
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest
     command: ["--config=/etc/docker/collector/otel-collector-config.yaml"]
+    hostname: myhostname
     volumes:
       - ./docker/collector/otel-collector-config.yaml:/etc/docker/collector/otel-collector-config.yaml
     ports:
