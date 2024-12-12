@@ -97,7 +97,7 @@ In this message:
 
 ### 3.2 Legacy Format (RFC 3164):
 
-  The older BSD Syslog format is simpler but less structured.
+  - The older BSD Syslog format is simpler but less structured.
 
 ### Header Structure
    ```plaintext
@@ -162,9 +162,7 @@ service:
 
 ## 5. Syslog Client Implementation
 
-### Code Snippets from the Application
-
-To send Syslog messages, this application uses the CloudBees Syslog Java Client library. Add the following dependency to your build.gradle file:
+To send Syslog messages, this application uses the CloudBees Syslog Java Client library. Add the following dependency to your `build.gradle` file:
 
 build.gradle
 ```
