@@ -6,6 +6,35 @@ This Spring Boot application demonstrates how to send Syslog messages using the 
 
 ---
 
+# Table of Contents
+
+   [Overview](#overview)
+1. [What is Syslog?](#1-what-is-syslog)
+2. [Syslog Message Types](#2-syslog-message-types)
+   - [Facility](#i-facility)
+   - [Severity](#ii-severity)
+3. [Syslog Message Formats](#3-syslog-message-formats)
+   - [Modern Format (RFC 5424)](#31-modern-format-rfc-5424)
+   - [Legacy Format (RFC 3164)](#32-legacy-format-rfc-3164)
+   - [Comparing RFC 3164 vs RFC 5424](#comparing-rfc-3164-vs-rfc-5424)
+4. [OpenTelemetry Collector as a Syslog Receiver](#4-opentelemetry-collector-as-a-syslog-receiver)
+5. [Syslog Client Implementation](#5-syslog-client-implementation)
+   - [Dependencies and Setup](#1-dependencies-and-setup)
+   - [Define Syslog Host and Port](#2-define-syslog-host-and-port)
+   - [Sending Syslog Messages](#3-sending-syslog-messages)
+   - [Testing the Syslog Message](#4-testing-the-syslog-message)
+6. [Docker Integration](#6-docker-integration)
+   - [Dockerfile](#dockerfile)
+   - [Docker Compose](#docker-compose)
+7. [Running the Application](#7-running-the-application)
+   - [Build the Application](#1-build-the-application)
+   - [Start with Docker Compose](#2-start-with-docker-compose)
+   - [Test Sending Syslog Messages](#3-test-sending-syslog-messages)
+8. [Sending Syslog with Different Severities](#8-sending-syslog-with-different-severities)
+9. [Notes](#notes)
+
+---
+
 ## 1. What is Syslog?
 **Syslog** (System Logging Protocol) is a standard protocol used for message logging. It allows devices and applications to send logs or events to a central server for monitoring and analysis. Syslog is commonly used for:
 
@@ -97,7 +126,7 @@ In this message:
 
 ### 3.2 Legacy Format (RFC 3164):
 
-  - The older BSD Syslog format is simpler but less structured.
+  The older BSD Syslog format is simpler but less structured.
 
 ### Header Structure
    ```plaintext
@@ -162,14 +191,15 @@ service:
 
 ## 5. Syslog Client Implementation
 
+#### 1. Dependencies and Setup
+
 To send Syslog messages, this application uses the CloudBees Syslog Java Client library. Add the following dependency to your `build.gradle` file:
 
-build.gradle
 ```
 implementation 'com.cloudbees:syslog-java-client:1.1.7'
 ```
 
-#### 1. Define Syslog Host and Port
+#### 2. Define Syslog Host and Port
 In `application.properties`, the Syslog server configuration is defined:
 ```properties
 syslog.server.hostname=${SYSLOG_SERVER_HOSTNAME:myhostname}
@@ -177,7 +207,7 @@ syslog.server.port=${SYSLOG_SERVER_PORT:514}
 ```
 This allows flexibility, where you can pass the server configuration via environment variables or use default values like `myhostname` and port `514`.
 
-#### 2. Sending Syslog Messages
+#### 3. Sending Syslog Messages
 The service class `SyslogSenderServiceImpl` uses **CloudBees Syslog Java Client** to send Syslog messages:
 ```java
 messageSender.setSyslogServerHostname(syslogServerHostname);
@@ -201,7 +231,7 @@ public void sendSyslogMessage(String message, Severity severity) {
 ```
 This method accepts a `message` and `severity` (e.g., INFORMATIONAL, ERROR, DEBUG), sets the severity for the message, and sends it. If the message is successfully sent, a log is generated, otherwise, an error message is logged.
 
-#### 3. Testing the Syslog Message
+#### 4. Testing the Syslog Message
 Use the endpoint `/send-syslog` to test:
 ```bash
 curl -X POST "http://localhost:8081/send-syslog?message=TestMessage&severity=INFORMATIONAL"
@@ -251,6 +281,7 @@ services:
    curl -X POST "http://localhost:8081/send-syslog?message=HelloSyslog&severity=INFORMATIONAL"
    ```
 
+
 ### Output Message after Sending Syslog
 
 When you hit the test Syslog message URL with the given `curl` command, the application will log the following messages in the **application logs**:
@@ -276,11 +307,11 @@ Here:
 
 ---
 
-### Sending Syslog with Different Severities
+## 8. Sending Syslog with Different Severities
 
-You can modify the severity by passing it as a query parameter when testing the Syslog message.
+   - You can modify the severity by passing it as a query parameter when testing the Syslog message.
 
-#### Example: Sending a DEBUG Message
+#### Example 1: Sending a DEBUG Message
 ```bash
 curl -X POST "http://localhost:8081/send-syslog?message=DebugMessage&severity=DEBUG"
 ```
@@ -292,7 +323,7 @@ INFO  2024-12-12 14:35:12 [SyslogSenderServiceImpl]: Syslog message sent: DebugM
 ```
 Here, `<7>` indicates the **DEBUG** severity level.
 
-#### Example: Sending an ERROR Message
+#### Example 2: Sending an ERROR Message
 ```bash
 curl -X POST "http://localhost:8081/send-syslog?message=ErrorMessage&severity=ERROR"
 ```
@@ -306,7 +337,7 @@ Here, `<3>` indicates the **ERROR** severity level.
 
 ---
 
-### Notes
+## 9. Notes
 - You can replace the OpenTelemetry Collector configuration or use a different exporter (e.g., Elasticsearch or Splunk) based on your requirements.
 - Ensure the Syslog server is reachable at the hostname and port specified.
 
