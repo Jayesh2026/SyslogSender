@@ -1,5 +1,5 @@
 
-# Syslog Sender Spring Boot Application
+# Open Telemetry and Syslog Client Integration
 
 ## Overview
 This Spring Boot application demonstrates how to send Syslog messages using the **CloudBees Syslog Java Client library**. It also integrates with the **OpenTelemetry Collector** as a Syslog receiver to collect and process Syslog messages for observability and monitoring.
@@ -51,14 +51,19 @@ The **Severity** value indicates the importance or urgency of the message. It is
 
 ---
 
-## 3. Message Format (RFC 5424)
-Syslog messages adhere to the RFC 5424 format, consisting of:
+## 3. Syslog Message Formats
+
+Syslog supports two main message formats: RFC 5424 (newer) and RFC 3164 (legacy/BSD format).
+
+### 3.1 Modern Format (RFC 5424):
+
+- The newer RFC 5424 format provides more structured data and better internationalization support.
 
 ### Header Structure
 ```plaintext
 <PRI>VERSION TIMESTAMP HOSTNAME APP-NAME PROCID MSGID
 ```
-- `PRI` : Priority value (Facility * 8 + Severity)
+- `PRI`: Priority value (Facility * 8 + Severity)
 - `VERSION`: Protocol version (1)
 - `TIMESTAMP`: ISO 8601 formatted timestamp
 - `HOSTNAME`: Machine name
@@ -87,7 +92,47 @@ In this message:
 - `myhostname`: Hostname of the system generating the message.  
 - `syslogSender`: Application name.  
 - `1234`: Process ID (optional).  
-- `Test message`: Actual message content.  
+- `Test message`: Actual message content.
+
+
+### 3.2 Legacy Format (RFC 3164):
+
+  The older BSD Syslog format is simpler but less structured.
+
+### Header Structure
+   ```plaintext
+  <PRI>TIMESTAMP HOSTNAME TAG: MESSAGE
+  ```
+- `PRI`: Priority value (same calculation as RFC 5424)
+- `TIMESTAMP`: Format is "MMM DD HH:MM:SS" (e.g., "Dec 12 12:34:56")
+- `HOSTNAME`: Name of the machine
+- `TAG`: Program name and optional process ID (up to 32 characters)
+- `MESSAGE`: Free-form message text
+
+### For example:
+```plaintext
+<14>Dec 12 12:34:56 myhostname syslogSender[1234]: Test message
+```
+
+In this message:
+- `<14>`: Priority (same as RFC 5424)
+- `Dec 12 12:34:56`: Timestamp in BSD format
+- `myhostname`: Hostname
+- `syslogSender[1234]`: Program name with PID
+- `Test message`: Message content
+
+#### Comparing RFC 3164 vs RFC 5424:
+
+Feature | RFC 3164 (Legacy) | RFC 5424 (Modern)
+--------|------------------|------------------
+Protocol Version | Not included | Mandatory version field (1)
+Timestamp Format | Basic format (Dec 12 12:34:56) | ISO 8601 with timezone and subsecond precision
+Message Structure | Simple text format | Supports structured data with key-value pairs
+Program Identification | Combined TAG field with program name and PID | Separate APP-NAME and PROCID fields
+Character Encoding | ASCII recommended | Full UTF-8 support
+Time Precision | Limited (no year, timezone) | Full precision with timezone support
+
+The modern RFC 5424 format offers greater flexibility and precision, while RFC 3164 remains simpler but more limited in its capabilities.
 
 ## 4. OpenTelemetry Collector as a Syslog Receiver
 
@@ -125,16 +170,16 @@ build.gradle
 ```
 implementation 'com.cloudbees:syslog-java-client:1.1.7'
 ```
-This will allow your Spring Boot application to send Syslog messages using the RFC 5424 format.
 
-#### Define Syslog Host and Port
+#### 1. Define Syslog Host and Port
 In `application.properties`, the Syslog server configuration is defined:
 ```properties
 syslog.server.hostname=${SYSLOG_SERVER_HOSTNAME:myhostname}
 syslog.server.port=${SYSLOG_SERVER_PORT:514}
 ```
+This allows flexibility, where you can pass the server configuration via environment variables or use default values like `myhostname` and port `514`.
 
-#### Sending Syslog Messages
+#### 2. Sending Syslog Messages
 The service class `SyslogSenderServiceImpl` uses **CloudBees Syslog Java Client** to send Syslog messages:
 ```java
 messageSender.setSyslogServerHostname(syslogServerHostname);
@@ -156,8 +201,9 @@ public void sendSyslogMessage(String message, Severity severity) {
     }
 }
 ```
+This method accepts a `message` and `severity` (e.g., INFORMATIONAL, ERROR, DEBUG), sets the severity for the message, and sends it. If the message is successfully sent, a log is generated, otherwise, an error message is logged.
 
-#### Testing the Syslog Message
+#### 3. Testing the Syslog Message
 Use the endpoint `/send-syslog` to test:
 ```bash
 curl -X POST "http://localhost:8081/send-syslog?message=TestMessage&severity=INFORMATIONAL"
@@ -265,6 +311,4 @@ Here, `<3>` indicates the **ERROR** severity level.
 ### Notes
 - You can replace the OpenTelemetry Collector configuration or use a different exporter (e.g., Elasticsearch or Splunk) based on your requirements.
 - Ensure the Syslog server is reachable at the hostname and port specified.
-
-
 
