@@ -32,6 +32,7 @@ This Spring Boot application demonstrates how to send Syslog messages using the 
    - [Test Sending Syslog Messages](#3-test-sending-syslog-messages)
 8. [Sending Syslog with Different Severities](#8-sending-syslog-with-different-severities)
 9. [Notes](#notes)
+10. [References](#10-references)
 
 ---
 
@@ -171,6 +172,12 @@ The OpenTelemetry Collector is configured to receive and process Syslog messages
 Key configuration in `otel-collector-config.yaml`:
 ```yaml
 receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+      grpc:
+        endpoint: 0.0.0.0:4317
   syslog:
     tcp:
       listen_address: "0.0.0.0:514"  # Listening on TCP port 514 for Syslog
@@ -183,7 +190,7 @@ exporters:
 service:
   pipelines:
     logs:
-      receivers: [syslog]   # Collect Syslog logs
+      receivers: [syslog, otlp]   # Collect Syslog logs
       exporters: [debug]    # Send to debug exporter
 ```
 
@@ -340,4 +347,11 @@ Here, `<3>` indicates the **ERROR** severity level.
 ## 9. Notes
 - You can replace the OpenTelemetry Collector configuration or use a different exporter (e.g., Elasticsearch or Splunk) based on your requirements.
 - Ensure the Syslog server is reachable at the hostname and port specified.
+
+---
+
+## 10. References 
+- https://www.paessler.com/it-explained/syslog
+- https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/receiver/syslogreceiver/README.md
+- https://github.com/jenkinsci/syslog-java-client
 
