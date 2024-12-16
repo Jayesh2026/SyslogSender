@@ -217,11 +217,27 @@ This allows flexibility, where you can pass the server configuration via environ
 #### 3. Sending Syslog Messages
 The service class `SyslogSenderServiceImpl` uses **CloudBees Syslog Java Client** to send Syslog messages:
 ```java
-messageSender.setSyslogServerHostname(syslogServerHostname);
-messageSender.setSyslogServerPort(syslogServerPort);
-messageSender.setDefaultFacility(Facility.USER);
-messageSender.setDefaultSeverity(Severity.INFORMATIONAL);
-messageSender.setMessageFormat(MessageFormat.RFC_5424);
+import com.cloudbees.syslog.Facility;
+import com.cloudbees.syslog.MessageFormat;
+import com.cloudbees.syslog.Severity;
+import com.cloudbees.syslog.sender.TcpSyslogMessageSender;
+
+...
+
+// Initialise sender
+ 
+      TcpSyslogMessageSender messageSender = new TcpSyslogMessageSender();
+
+        messageSender.setDefaultAppName(appName);
+        messageSender.setSyslogServerHostname(syslogServerHostname);
+        messageSender.setSyslogServerPort(syslogServerPort);
+        messageSender.setDefaultFacility(Facility.USER);
+        messageSender.setDefaultSeverity(Severity.INFORMATIONAL);
+        messageSender.setMessageFormat(MessageFormat.RFC_5424);
+        messageSender.setSsl(false);
+
+// send a Syslog message
+messageSender.sendMessage("This is a test message");
 ```
 
 Example method to send messages:
@@ -265,11 +281,39 @@ services:
   syslog-sender:
     build:
       context: .
+      dockerfile: Dockerfile
     ports:
       - "8081:8081"
+    depends_on:
+      - otel-collector
     environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_SERVICE_NAME: syslog-sender
+      OTEL_METRICS_EXPORTER: none # disable export metrics
+      OTEL_TRACES_EXPORTER: none  # disable trace export
+
+      # Syslog Configuration
       SYSLOG_SERVER_HOSTNAME: myhostname
       SYSLOG_SERVER_PORT: 514
+    networks:
+      - otel-network
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/docker/collector/otel-collector-config.yaml"]  # set the path of otel-collector-config.yaml file
+    hostname: myhostname
+    volumes:
+      - ./docker/collector/otel-collector-config.yaml:/etc/docker/collector/otel-collector-config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "514:514" # Syslog TCP
+    networks:
+      - otel-network
+
+networks:
+  otel-network:
+    driver: bridge
 ```
 
 ---
